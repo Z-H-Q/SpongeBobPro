@@ -108,8 +108,8 @@ def train_epoch(epoch, loader, iters, start_step=0, swanlab=None, total_steps=No
         # Benchmark 评测
         if args.eval_bench == 1 and tokenizer is not None and global_step % args.eval_interval == 0:
             model.eval()
-            c3_path = 'D:\桌面\SpongeBobPro\dataset\clue_c3_eval_500.jsonl'
-            xcopa_path = 'D:\桌面\SpongeBobPro\dataset\xcopa_zh_merged.jsonl'
+            c3_path = 'D:\桌面\SpongeBobPro\benchmark\clue_c3_eval_500.jsonl'
+            xcopa_path = 'D:\桌面\SpongeBobPro\benchmark\xcopa_zh_merged.jsonl'
             eval_results = run_benchmark(model, tokenizer, c3_path, xcopa_path)
             if swanlab_run:
                 swanlab_run.log(eval_results, step=global_step)
@@ -203,7 +203,7 @@ if __name__ == "__main__":
         tokenizer = None
     # 使用算子加速器
     if args.use_compile == 1:
-        model = torch.compile(model)
+        model = torch.compile(model) 
         Logger('torch.compile enabled')
 
     Logger('Loading dataset...')
@@ -235,9 +235,9 @@ if __name__ == "__main__":
     if args.eval_bench == 1 and tokenizer is not None and start_epoch == 0 and start_step == 0:
         Logger('Running initial benchmark evaluation (step 0)...')
         model.eval()
-        c3_path = '测试集地址'
-        xcopa_path = '测试集地址'
-        eval_results = run_benchmark(model, tokenizer, c3_path, xcopa_path)
+        c3_path = 'D:\桌面\SpongeBobPro\benchmark\clue_c3_eval_500.jsonl'
+        xcopa_path = 'D:\桌面\SpongeBobPro\benchmark\xcopa_zh_merged.jsonl'
+        eval_results = run_benchmark(model, tokenizer, c3_path, xcopa_path) # 给出评测分数
         if swanlab_run:
             swanlab_run.log(eval_results, step=0)
         Logger(f'Initial benchmark results (step 0): {eval_results}')
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     for epoch in range(start_epoch, args.epochs):
         indices = torch.randperm(len(train_ds)).tolist()
         skip = start_step if (epoch == start_epoch and start_step > 0) else 0
-        batch_sampler = SkipBatchSampler(indices, args.batch_size, skip)
+        batch_sampler = SkipBatchSampler(indices, args.batch_size, skip) # 从断点开始，跳过某些数据，避免重训
         loader = DataLoader(train_ds, batch_sampler=batch_sampler, num_workers=args.num_workers, pin_memory=True)
         if skip > 0:
             Logger(f'Epoch [{epoch + 1}/{args.epochs}]: 跳过前{start_step}个step，从step {start_step + 1}开始')

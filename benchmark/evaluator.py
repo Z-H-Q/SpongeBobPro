@@ -23,7 +23,7 @@ def eval_multiple_choice(model, tokenizer, context, choices, label_idx, max_leng
         1 表示预测正确，0 表示预测错误
     """
     losses = []
-    
+    # 小红想要吃雪糕。问题：现在是什么天气？春天（choice），从‘？’位置开始计算输出的loss
     for choice in choices:
         # 拼接 context + choice
         full_text = context + choice
@@ -49,8 +49,8 @@ def eval_multiple_choice(model, tokenizer, context, choices, label_idx, max_leng
         
         # 计算 loss（只计算 choice 部分）
         # shift_logits[i] 用于预测 input_ids[i+1]
-        shift_logits = logits[..., :-1, :].contiguous()
-        shift_labels = input_ids[..., 1:].contiguous()
+        shift_logits = logits[..., :-1, :].contiguous() # 表示：取所有维度，但中间这一维（序列长度）去掉【最后一个】
+        shift_labels = input_ids[..., 1:].contiguous() # 表示：取所有维度，但中间这一维（序列长度）去掉【第一个】
         
         loss_fct = torch.nn.CrossEntropyLoss(reduction='none')
         loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
